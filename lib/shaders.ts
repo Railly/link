@@ -142,9 +142,12 @@ void main() {
   vec2 f = fract(gl_FragCoord.xy / cell) - 0.5;
   vec2 uv = (g * cell - 0.5 * u_res) / u_res.y;
   float t = u_time * 0.1;
-  float n = fbm(uv * 1.6 + vec2(t, -t * 0.6) + fbm(uv * 2.0 - t) * 0.8);
+  // Parallax: the whole field slides with the pointer / phone tilt, not just the highlight.
+  vec2 shift = (u_mouse - 0.5) * 0.7;
+  vec2 q = uv + shift;
+  float n = fbm(q * 1.6 + vec2(t, -t * 0.6) + fbm(q * 2.0 - t) * 0.8);
   float m = length(uv - (u_mouse - 0.5) * vec2(u_res.x / u_res.y, 1.0));
-  float v = clamp(n * 0.7 + 0.45 + smoothstep(0.35, 0.0, m) * 0.35, 0.0, 1.0);
+  float v = clamp(n * 0.7 + 0.45 + smoothstep(0.6, 0.0, m) * 0.45, 0.0, 1.0);
   float r = v * 0.5;
   float d = smoothstep(r, r - 1.5 / cell, length(f));
   vec3 dotCol = mix(u_c2, u_c3, smoothstep(0.4, 0.9, v));

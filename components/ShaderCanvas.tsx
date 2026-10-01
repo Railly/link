@@ -103,8 +103,8 @@ export default function ShaderCanvas({ shader, colors, speed = 1, className }: P
       if (e.beta === null || e.gamma === null) return;
       rest ??= { beta: e.beta, gamma: e.gamma };
       // Slowly re-centre so a new grip becomes the neutral position.
-      rest.beta += (e.beta - rest.beta) * 0.003;
-      rest.gamma += (e.gamma - rest.gamma) * 0.003;
+      rest.beta += (e.beta - rest.beta) * 0.0008;
+      rest.gamma += (e.gamma - rest.gamma) * 0.0008;
       let dx = e.gamma - rest.gamma;
       let dy = rest.beta - e.beta;
       const angle = screen.orientation?.angle ?? 0;

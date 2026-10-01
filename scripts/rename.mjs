@@ -19,7 +19,7 @@ if (!moved) {
 await redis.rename(`page:${from}`, `page:${to}`);
 await redis.rename(`meta:${from}`, `meta:${to}`);
 
-const base = process.env.SITE_URL ?? "https://linkmi.ar";
+const base = process.env.SITE_URL ?? "https://linkmii.vercel.app";
 const res = await fetch(`${base}/api/revalidate?h=${encodeURIComponent(from)}`, {
   method: "POST",
   headers: { authorization: `Bearer ${process.env.ADMIN_SECRET ?? ""}` },

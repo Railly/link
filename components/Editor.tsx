@@ -40,8 +40,9 @@ function loadOwned(): Owned | null {
 }
 
 const label = "font-mono text-[10px] uppercase tracking-[0.18em] text-white/45";
+// text-base on phones: iOS Safari zooms into inputs smaller than 16px.
 const input =
-  "w-full rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white placeholder:text-white/25 outline-none transition-colors focus:border-white/35";
+  "w-full rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-base text-white placeholder:text-white/25 outline-none transition-colors focus:border-white/35 lg:text-sm";
 const chip = (on: boolean) =>
   `rounded-lg border px-3 py-2 text-xs transition-colors ${
     on ? "border-white/60 bg-white/10 text-white" : "border-white/10 text-white/55 hover:border-white/25 hover:text-white"
@@ -76,6 +77,8 @@ export default function Editor({ canPublish, canUpload }: { canPublish: boolean;
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const [copied, setCopied] = useState<string | null>(null);
+  // Phones show one pane at a time; desktop always shows both side by side.
+  const [mobileView, setMobileView] = useState<"edit" | "preview">("edit");
   const [lt, setLt] = useState("");
   const [importState, setImportState] = useState<"idle" | "loading" | string>("idle");
 
@@ -203,20 +206,24 @@ export default function Editor({ canPublish, canUpload }: { canPublish: boolean;
   return (
     <div className="grid min-h-dvh lg:h-dvh lg:grid-cols-[440px_1fr]">
       {/* preview */}
-      <div className="relative h-[70dvh] overflow-hidden lg:order-2 lg:h-full">
+      <div
+        className={`${mobileView === "preview" ? "fixed inset-x-0 top-0 bottom-20" : "hidden"} overflow-hidden lg:relative lg:inset-auto lg:order-2 lg:block lg:h-full`}
+      >
         <LinkPage config={config} contained footer={false} />
       </div>
 
       {/* controls */}
-      <aside className="relative border-white/[0.07] bg-[#0b0a10] px-5 pb-28 lg:order-1 lg:overflow-y-auto lg:border-r">
+      <aside
+        className={`${mobileView === "edit" ? "" : "hidden"} relative border-white/[0.07] bg-[#0b0a10] px-5 pb-32 lg:order-1 lg:block lg:overflow-y-auto lg:border-r`}
+      >
         <header className="flex items-center justify-between py-6">
           <Link href="/" className="font-serif text-2xl italic">
             linkmi
           </Link>
-          <span className={label}>editor</span>
+          <span className={label}>{owned ? `editando /${owned.handle}` : "editor"}</span>
         </header>
 
-        <Section title="Publicar">
+        <Section title={owned ? "Tu página" : "Publicar"}>
           {canPublish && owned ? (
             <>
               <a href={publicUrl(owned)} target="_blank" className="truncate text-sm text-white underline-offset-4 hover:underline">
@@ -239,7 +246,7 @@ export default function Editor({ canPublish, canUpload }: { canPublish: boolean;
             </>
           ) : canPublish ? (
             <>
-              <div className="flex items-center rounded-lg border border-white/10 bg-white/[0.04] pl-3 text-sm focus-within:border-white/35">
+              <div className="flex items-center rounded-lg border border-white/10 bg-white/[0.04] pl-3 text-base lg:text-sm focus-within:border-white/35">
                 <span className="text-white/35">{typeof window !== "undefined" ? window.location.host : ""}/</span>
                 <input
                   className="w-full bg-transparent py-2 pr-3 text-white outline-none placeholder:text-white/25"
@@ -433,38 +440,45 @@ export default function Editor({ canPublish, canUpload }: { canPublish: boolean;
             <button className={chip(config.showIndex)} onClick={() => set("showIndex", !config.showIndex)}>01 02 03</button>
           </div>
         </Section>
-
-        <div className="fixed inset-x-0 bottom-0 z-10 flex flex-col gap-2 border-t border-white/[0.07] bg-[#0b0a10]/90 p-4 backdrop-blur lg:w-[440px]">
-          {notice ? (
-            <p role="status" className={`text-xs ${notice.ok ? "text-emerald-300/80" : "text-red-300/80"}`}>
-              {notice.msg}
-            </p>
-          ) : null}
-          <div className="flex gap-2">
-            <button
-              onClick={canPublish ? (owned ? save : publish) : () => copy(encodedUrl(), "main")}
-              disabled={busy}
-              className="flex-1 rounded-xl bg-white py-3 text-sm font-medium text-black transition-transform active:scale-[0.98] disabled:opacity-60"
-            >
-              {busy
-                ? "…"
-                : canPublish
-                  ? owned
-                    ? "guardar cambios"
-                    : "publicar"
-                  : copied === "main"
-                    ? "¡copiado!"
-                    : "copiar mi link"}
-            </button>
-            <button
-              onClick={() => window.open(owned ? publicUrl(owned) : encodedUrl(), "_blank", "noopener")}
-              className="rounded-xl border border-white/15 px-4 text-sm text-white/80 transition-colors hover:border-white/40"
-            >
-              abrir ↗
-            </button>
-          </div>
-        </div>
       </aside>
+
+      <div className="fixed inset-x-0 bottom-0 z-10 flex flex-col gap-2 border-t border-white/[0.07] bg-[#0b0a10]/90 p-4 backdrop-blur lg:w-[440px]">
+        {notice ? (
+          <p role="status" className={`text-xs ${notice.ok ? "text-emerald-300/80" : "text-red-300/80"}`}>
+            {notice.msg}
+          </p>
+        ) : null}
+        <div className="flex gap-2">
+          <button
+            onClick={() => setMobileView((v) => (v === "edit" ? "preview" : "edit"))}
+            className="rounded-xl border border-white/15 px-4 text-sm text-white/80 transition-colors hover:border-white/40 lg:hidden"
+          >
+            {mobileView === "edit" ? "vista previa" : "editar"}
+          </button>
+          <button
+            onClick={canPublish ? (owned ? save : publish) : () => copy(encodedUrl(), "main")}
+            disabled={busy}
+            className="flex-1 rounded-xl bg-white py-3 text-sm font-medium text-black transition-transform active:scale-[0.98] disabled:opacity-60"
+          >
+            {busy
+              ? "…"
+              : canPublish
+                ? owned
+                  ? "guardar cambios"
+                  : "publicar"
+                : copied === "main"
+                  ? "¡copiado!"
+                  : "copiar mi link"}
+          </button>
+          <button
+            onClick={() => window.open(owned ? publicUrl(owned) : encodedUrl(), "_blank", "noopener")}
+            aria-label="abrir página publicada"
+            className="rounded-xl border border-white/15 px-4 text-sm text-white/80 transition-colors hover:border-white/40"
+          >
+            ↗
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

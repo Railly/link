@@ -17,6 +17,6 @@ if (!claimed) {
 const now = Date.now();
 await redis.mset({ [`page:${handle}`]: SOFIA, [`meta:${handle}`]: { createdAt: now, updatedAt: now } });
 
-const base = process.env.SITE_URL ?? "https://linkmi.ar";
+const base = process.env.SITE_URL ?? "https://linkmii.vercel.app";
 console.log(`Seeded ${base}/${handle}`);
 console.log(`Edit link (save it, it is shown only once):\n${base}/editor?h=${handle}#k=${editToken}`);
