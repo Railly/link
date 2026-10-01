@@ -2,7 +2,7 @@
 
 A free link-in-bio page with hand-written WebGL shader backgrounds, careful typography and no accounts.
 
-**Live:** [linkmii.vercel.app](https://linkmii.vercel.app) · **Example:** [linkmii.vercel.app/sofiferro](https://linkmii.vercel.app/sofiferro)
+**Live:** [linkmi.ar](https://linkmi.ar) · **Example:** [linkmi.ar/sofiferro](https://linkmi.ar/sofiferro)
 
 - 5 shaders (micelio, aurora, liquid chrome, mesh gradient, halftone) with custom colours and speed
 - 4 type pairings, 4 button styles, adjustable corners
@@ -11,7 +11,7 @@ A free link-in-bio page with hand-written WebGL shader backgrounds, careful typo
 
 ## Three ways to use it
 
-1. **Hosted page** — open [`/editor`](https://linkmii.vercel.app/editor), pick a name and publish. You get `linkmii.vercel.app/yourname` plus a private edit link. Keep the edit link safe: it is the only way to edit the page.
+1. **Hosted page** — open [`/editor`](https://linkmi.ar/editor), pick a name and publish. You get `linkmi.ar/yourname` plus a private edit link. Keep the edit link safe: it is the only way to edit the page.
 2. **Encoded link** — "link sin cuenta" in the editor puts the whole page inside the URL (`/p#…`). Nothing is stored anywhere.
 3. **Your own deploy** — fork it and serve a single page from `linkmi.config.json`, with no database:
 
