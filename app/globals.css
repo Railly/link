@@ -21,6 +21,16 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* ---------- home ---------- */
+
+/* A dark halo keeps the landing copy legible over the bright caustic lines. */
+.home-copy :is(h1, p, nav, footer) {
+  text-shadow:
+    0 0 24px #0a0a0a,
+    0 0 10px #0a0a0a,
+    0 0 3px #0a0a0a;
+}
+
 /* ---------- link page ---------- */
 
 /*
