@@ -31,6 +31,8 @@ export default function LinkPage({ config, contained = false, footer = true, rep
           "--radius": `${config.radius}px`,
           color: light ? "#fff" : "#0c0c0e",
           fontFamily: font.body,
+          // Shown until the shader's first frame, and instead of it without WebGL.
+          background: `radial-gradient(circle at 20% 15%, ${config.colors[1]}, transparent 65%), radial-gradient(circle at 85% 90%, color-mix(in srgb, ${config.colors[2]} 35%, transparent), transparent 55%), ${config.colors[0]}`,
         } as React.CSSProperties
       }
     >
@@ -87,7 +89,7 @@ export default function LinkPage({ config, contained = false, footer = true, rep
                     {String(i + 1).padStart(2, "0")}
                   </span>
                 ) : null}
-                <span className="flex-1 truncate">{l.title}</span>
+                <span className="line-clamp-2 flex-1 text-balance break-words">{l.title}</span>
                 <span aria-hidden className="lp-arrow shrink-0 text-[13px] opacity-50">
                   ↗
                 </span>

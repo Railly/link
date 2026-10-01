@@ -15,7 +15,7 @@ export default function Home() {
   }
 
   return (
-    <div className="relative min-h-dvh overflow-hidden">
+    <div className="relative min-h-dvh overflow-hidden bg-[#0a0a0a]">
       <ShaderCanvas shader="caustics" colors={HOME_COLORS} className="fixed inset-0 h-full w-full" />
 
       <main className="home-copy relative mx-auto flex min-h-dvh max-w-3xl flex-col px-4 py-8 sm:px-8">

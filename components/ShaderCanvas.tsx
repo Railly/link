@@ -92,6 +92,8 @@ export default function ShaderCanvas({ shader, colors, speed = 1, className }: P
       gl.uniform2f(uMouse, mouse.x, mouse.y);
       live.current.colors.forEach((c, i) => gl.uniform3fv(uC[i], hexToRgb(c)));
       gl.drawArrays(gl.TRIANGLES, 0, 3);
+      // Fade in over the parent's CSS fallback once there is a real frame.
+      canvas.style.opacity = "1";
       if (!reduced) raf = requestAnimationFrame(draw);
     };
 
@@ -178,7 +180,7 @@ export default function ShaderCanvas({ shader, colors, speed = 1, className }: P
       ref={canvasRef}
       aria-hidden
       className={className}
-      style={{ background: colors[0] }}
+      style={{ opacity: 0, transition: "opacity 500ms ease-out" }}
     />
   );
 }
