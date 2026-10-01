@@ -13,7 +13,7 @@ if (!removed) {
   process.exit(0);
 }
 
-const base = process.env.SITE_URL ?? "https://linkmicelio.vercel.app";
+const base = process.env.SITE_URL ?? "https://linkmi.ar";
 const res = await fetch(`${base}/api/revalidate?h=${encodeURIComponent(handle)}`, {
   method: "POST",
   headers: { authorization: `Bearer ${process.env.ADMIN_SECRET ?? ""}` },

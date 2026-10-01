@@ -3,11 +3,11 @@ import ShaderCanvas from "@/components/ShaderCanvas";
 import LinkPage from "@/components/LinkPage";
 import { normalizeConfig } from "@/lib/config";
 import { SHADERS } from "@/lib/shaders";
-import siteConfig from "@/micelio.config.json";
+import siteConfig from "@/linkmi.config.json";
 
 export default function Home() {
   // Self-hosted forks serve their own page at the root instead of the landing.
-  if (process.env.MICELIO_MODE === "single") {
+  if (process.env.LINKMI_MODE === "single") {
     return <LinkPage config={normalizeConfig(siteConfig)} />;
   }
 
@@ -17,7 +17,7 @@ export default function Home() {
 
       <main className="relative mx-auto flex min-h-dvh max-w-3xl flex-col px-4 py-8 sm:px-8">
         <nav className="flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.2em] text-white/60">
-          <span>micelio</span>
+          <span>linkmi</span>
           <Link href="/sofiaferro" className="transition-colors hover:text-white">
             ejemplo ↗
           </Link>

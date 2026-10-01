@@ -19,8 +19,11 @@ import {
 } from "@/lib/config";
 import { SHADERS, type ShaderId } from "@/lib/shaders";
 
-const DRAFT_KEY = "micelio:draft";
-const OWNED_KEY = "micelio:owned";
+const DRAFT_KEY = "linkmi:draft";
+const OWNED_KEY = "linkmi:owned";
+// Pre-rename keys, read once so existing drafts and edit access survive.
+const LEGACY_KEYS: Record<string, string> = { [DRAFT_KEY]: "micelio:draft", [OWNED_KEY]: "micelio:owned" };
+const readKey = (key: string) => localStorage.getItem(key) ?? localStorage.getItem(LEGACY_KEYS[key]);
 
 type Owned = { handle: string; token: string };
 
@@ -30,7 +33,7 @@ function loadOwned(): Owned | null {
   const token = new URLSearchParams(window.location.hash.slice(1)).get("k");
   if (handle && token) return { handle: normalizeHandle(handle), token };
   try {
-    const saved = JSON.parse(localStorage.getItem(OWNED_KEY) ?? "null");
+    const saved = JSON.parse(readKey(OWNED_KEY) ?? "null");
     if (saved?.handle && saved?.token) return saved;
   } catch {}
   return null;
@@ -55,7 +58,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function loadDraft(): PageConfig {
   try {
-    const saved = localStorage.getItem(DRAFT_KEY);
+    const saved = readKey(DRAFT_KEY);
     if (saved) return normalizeConfig(JSON.parse(saved));
   } catch {}
   return DEFAULT_CONFIG;
@@ -155,6 +158,7 @@ export default function Editor({ canPublish, canUpload }: { canPublish: boolean;
   const forget = () => {
     try {
       localStorage.removeItem(OWNED_KEY);
+      localStorage.removeItem(LEGACY_KEYS[OWNED_KEY]);
     } catch {}
     window.history.replaceState(null, "", "/editor");
     setOwned(null);
@@ -176,7 +180,7 @@ export default function Editor({ canPublish, canUpload }: { canPublish: boolean;
   const downloadConfig = () => {
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([JSON.stringify(config, null, 2)], { type: "application/json" }));
-    a.download = "micelio.config.json";
+    a.download = "linkmi.config.json";
     a.click();
     URL.revokeObjectURL(a.href);
   };
@@ -207,7 +211,7 @@ export default function Editor({ canPublish, canUpload }: { canPublish: boolean;
       <aside className="relative border-white/[0.07] bg-[#0b0a10] px-5 pb-28 lg:order-1 lg:overflow-y-auto lg:border-r">
         <header className="flex items-center justify-between py-6">
           <Link href="/" className="font-serif text-2xl italic">
-            micelio
+            linkmi
           </Link>
           <span className={label}>editor</span>
         </header>

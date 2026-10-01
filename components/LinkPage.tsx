@@ -98,7 +98,7 @@ export default function LinkPage({ config, contained = false, footer = true, rep
         {footer ? (
           <div className="mt-auto flex gap-6 pt-16 font-mono text-[10px] uppercase tracking-[0.2em] opacity-40">
             <Link href="/editor" className="transition-opacity hover:opacity-100">
-              micelio · creá la tuya →
+              linkmi · creá la tuya →
             </Link>
             {reportEmail ? (
               <a

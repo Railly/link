@@ -8,7 +8,7 @@ export async function GET(req: Request) {
   }
 
   const res = await fetch(`https://linktr.ee/${encodeURIComponent(username)}`, {
-    headers: { "user-agent": "Mozilla/5.0 (micelio importer)" },
+    headers: { "user-agent": "Mozilla/5.0 (linkmi importer)" },
     next: { revalidate: 300 },
   });
   if (!res.ok) return NextResponse.json({ error: "no encontramos ese perfil" }, { status: 404 });

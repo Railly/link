@@ -3,7 +3,7 @@ const HANDLE_RE = /^[a-z0-9][a-z0-9._-]{1,29}$/;
 /** Route segments and words people should not be able to claim. */
 const RESERVED = new Set([
   "editor", "api", "p", "admin", "login", "logout", "signup", "about", "help", "terms", "privacy",
-  "settings", "static", "public", "assets", "www", "app", "micelio", "favicon.ico", "robots.txt",
+  "settings", "static", "public", "assets", "www", "app", "micelio", "linkmi", "favicon.ico", "robots.txt",
   "sitemap.xml", "_next", "new", "edit", "explore", "report", "support", "root", "null", "undefined",
 ]);
 

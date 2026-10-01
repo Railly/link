@@ -14,7 +14,7 @@ const space = Space_Grotesk({ variable: "--font-space", subsets: ["latin"] });
 const syne = Syne({ variable: "--font-syne", subsets: ["latin"], weight: ["400", "700"] });
 
 export const metadata: Metadata = {
-  title: "micelio — links con shaders",
+  title: "linkmi — links con shaders",
   description: "Tu página de links, gratis, con fondos en shaders y tipografía cuidada.",
 };
 

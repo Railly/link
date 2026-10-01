@@ -1,6 +1,6 @@
 {
   "name": "tu nombre",
-  "bio": "editá micelio.config.json o diseñá tu página en /editor y descargá la config",
+  "bio": "editá linkmi.config.json o diseñá tu página en /editor y descargá la config",
   "avatar": "",
   "links": [
     { "id": "1", "title": "portfolio", "url": "https://example.com" },

@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: PageProps<"/[handle]">): Prom
 async function HandlePage({ params }: Pick<PageProps<"/[handle]">, "params">) {
   const config = await resolve(params);
   if (!config) notFound();
-  return <LinkPage config={config} reportEmail={process.env.MICELIO_REPORT_EMAIL} />;
+  return <LinkPage config={config} reportEmail={process.env.LINKMI_REPORT_EMAIL} />;
 }
 
 export default function Page({ params }: PageProps<"/[handle]">) {
