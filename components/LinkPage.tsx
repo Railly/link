@@ -22,6 +22,7 @@ export default function LinkPage({ config, contained = false, footer = true, rep
 
   return (
     <div
+      data-shader={config.shader}
       className={`${contained ? "absolute" : "fixed"} inset-0 overflow-hidden`}
       style={
         {
@@ -65,7 +66,7 @@ export default function LinkPage({ config, contained = false, footer = true, rep
 
         {config.bio ? (
           <p
-            className="lp-rise mt-3 max-w-sm text-balance text-center text-[13px] leading-relaxed opacity-70"
+            className="lp-rise lp-label mt-3 max-w-sm text-balance text-center text-[13px] leading-relaxed text-[rgb(var(--ink)/0.7)]"
             style={{ animationDelay: "110ms" }}
           >
             {config.bio}
@@ -96,18 +97,20 @@ export default function LinkPage({ config, contained = false, footer = true, rep
         </ul>
 
         {footer ? (
-          <div className="mt-auto flex gap-6 pt-16 font-mono text-[10px] uppercase tracking-[0.2em] opacity-40">
-            <Link href="/editor" className="transition-opacity hover:opacity-100">
-              linkmi · creá la tuya →
-            </Link>
-            {reportEmail ? (
-              <a
-                href={`mailto:${reportEmail}?subject=${encodeURIComponent(`reporte: ${config.name}`)}`}
-                className="transition-opacity hover:opacity-100"
-              >
-                reportar
-              </a>
-            ) : null}
+          <div className="mt-auto pt-16 font-mono text-[10px] uppercase tracking-[0.2em]">
+            <div className="lp-label flex gap-6">
+              <Link href="/editor" className="opacity-40 transition-opacity hover:opacity-100">
+                linkmi · creá la tuya →
+              </Link>
+              {reportEmail ? (
+                <a
+                  href={`mailto:${reportEmail}?subject=${encodeURIComponent(`reporte: ${config.name}`)}`}
+                  className="opacity-40 transition-opacity hover:opacity-100"
+                >
+                  reportar
+                </a>
+              ) : null}
+            </div>
           </div>
         ) : null}
       </main>
