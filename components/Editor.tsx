@@ -57,6 +57,9 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
+/** Stable comparison key, so key order or defaults filled in by the server don't count as edits. */
+const fingerprint = (c: PageConfig) => JSON.stringify(normalizeConfig(c));
+
 function loadDraft(): PageConfig {
   try {
     const saved = readKey(DRAFT_KEY);
@@ -69,7 +72,8 @@ function loadDraft(): PageConfig {
 export default function Editor({ canPublish, canUpload }: { canPublish: boolean; canUpload: boolean }) {
   const [config, setConfig] = useState<PageConfig>(loadDraft);
   const [owned, setOwned] = useState<Owned | null>(() => (canPublish ? loadOwned() : null));
-  const [handle, setHandle] = useState("");
+  // `?claim=name` comes from the 404 of a free handle.
+  const [handle, setHandle] = useState(() => normalizeHandle(new URLSearchParams(window.location.search).get("claim") ?? ""));
   const [handleStatus, setHandleStatus] = useState<{ ok: boolean; msg: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<{ ok: boolean; msg: string } | null>(null);
@@ -81,6 +85,36 @@ export default function Editor({ canPublish, canUpload }: { canPublish: boolean;
   const [mobileView, setMobileView] = useState<"edit" | "preview">("edit");
   const [lt, setLt] = useState("");
   const [importState, setImportState] = useState<"idle" | "loading" | string>("idle");
+  // What the published page currently holds; null until known.
+  const [savedPrint, setSavedPrint] = useState<string | null>(null);
+  const [removed, setRemoved] = useState<{ link: PageConfig["links"][number]; index: number } | null>(null);
+  const dirty = owned !== null && savedPrint !== null && fingerprint(config) !== savedPrint;
+
+  useEffect(() => {
+    if (!dirty) return;
+    const warn = (e: BeforeUnloadEvent) => e.preventDefault();
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [dirty]);
+
+  useEffect(() => {
+    if (!removed) return;
+    const id = setTimeout(() => setRemoved(null), 5000);
+    return () => clearTimeout(id);
+  }, [removed]);
+
+  const removeLink = (i: number) => {
+    setRemoved({ link: config.links[i], index: i });
+    set("links", config.links.filter((_, j) => j !== i));
+  };
+
+  const undoRemove = () => {
+    if (!removed) return;
+    const next = [...config.links];
+    next.splice(Math.min(removed.index, next.length), 0, removed.link);
+    set("links", next);
+    setRemoved(null);
+  };
 
   useEffect(() => {
     try {
@@ -108,10 +142,14 @@ export default function Editor({ canPublish, canUpload }: { canPublish: boolean;
     try {
       localStorage.setItem(OWNED_KEY, JSON.stringify(owned));
     } catch {}
-    if (window.location.hash.includes("k=")) {
-      window.history.replaceState(null, "", `/editor?h=${owned.handle}`);
-      loadPage(owned.handle).then((published) => published && setConfig(published));
-    }
+    // Opening an edit link loads the published page; otherwise keep the local draft and only compare.
+    const fromLink = window.location.hash.includes("k=");
+    if (fromLink) window.history.replaceState(null, "", `/editor?h=${owned.handle}`);
+    loadPage(owned.handle).then((published) => {
+      if (!published) return;
+      if (fromLink) setConfig(published);
+      setSavedPrint(fingerprint(published));
+    });
   }, [owned]);
 
   // Debounced availability check while typing a handle.
@@ -145,6 +183,7 @@ export default function Editor({ canPublish, canUpload }: { canPublish: boolean;
     const res = await publishPage(handle, config);
     setBusy(false);
     if (!res.ok) return setNotice({ ok: false, msg: res.error });
+    setSavedPrint(fingerprint(config));
     setOwned({ handle: res.handle, token: res.token });
     setJustPublished(true);
   };
@@ -155,6 +194,7 @@ export default function Editor({ canPublish, canUpload }: { canPublish: boolean;
     setNotice(null);
     const res = await savePage(owned.handle, owned.token, config);
     setBusy(false);
+    if (res.ok) setSavedPrint(fingerprint(config));
     setNotice(res.ok ? { ok: true, msg: "cambios guardados" } : { ok: false, msg: res.error });
   };
 
@@ -165,6 +205,7 @@ export default function Editor({ canPublish, canUpload }: { canPublish: boolean;
     } catch {}
     window.history.replaceState(null, "", "/editor");
     setOwned(null);
+    setSavedPrint(null);
     setJustPublished(false);
   };
 
@@ -338,15 +379,13 @@ export default function Editor({ canPublish, canUpload }: { canPublish: boolean;
                   <input className={input} placeholder="https://" value={l.url} onChange={(e) => setLink(l.id, { url: e.target.value })} />
                 </div>
                 <div className="flex flex-col justify-between text-white/40">
-                  <button aria-label="subir" className="px-1.5 hover:text-white" onClick={() => moveLink(i, -1)}>↑</button>
-                  <button
-                    aria-label="eliminar"
-                    className="px-1.5 hover:text-red-300"
-                    onClick={() => set("links", config.links.filter((x) => x.id !== l.id))}
-                  >
+                  <div className="flex flex-col">
+                    <button aria-label="subir" className="px-1.5 py-0.5 hover:text-white" onClick={() => moveLink(i, -1)}>↑</button>
+                    <button aria-label="bajar" className="px-1.5 py-0.5 hover:text-white" onClick={() => moveLink(i, 1)}>↓</button>
+                  </div>
+                  <button aria-label="eliminar" className="px-1.5 py-0.5 hover:text-red-300" onClick={() => removeLink(i)}>
                     ×
                   </button>
-                  <button aria-label="bajar" className="px-1.5 hover:text-white" onClick={() => moveLink(i, 1)}>↓</button>
                 </div>
               </li>
             ))}
@@ -364,9 +403,14 @@ export default function Editor({ canPublish, canUpload }: { canPublish: boolean;
             {(Object.keys(SHADERS) as ShaderId[]).map((id) => (
               <button
                 key={id}
-                className={chip(config.shader === id)}
+                className={`${chip(config.shader === id)} flex flex-col gap-1.5 text-left`}
                 onClick={() => setConfig((c) => ({ ...c, shader: id, colors: SHADERS[id].palette }))}
               >
+                <span
+                  aria-hidden
+                  className="h-1.5 w-full rounded-full"
+                  style={{ background: `linear-gradient(90deg, ${SHADERS[id].palette.join(", ")})` }}
+                />
                 {SHADERS[id].label}
               </button>
             ))}
@@ -443,9 +487,20 @@ export default function Editor({ canPublish, canUpload }: { canPublish: boolean;
       </aside>
 
       <div className="fixed inset-x-0 bottom-0 z-10 flex flex-col gap-2 border-t border-white/[0.07] bg-[#0b0a10]/90 p-4 backdrop-blur lg:w-[440px]">
-        {notice ? (
+        {removed ? (
+          <p role="status" className="flex items-center gap-3 text-xs text-white/70">
+            link eliminado
+            <button onClick={undoRemove} className="underline underline-offset-4 hover:text-white">
+              deshacer
+            </button>
+          </p>
+        ) : notice && !(notice.ok && dirty) ? (
           <p role="status" className={`text-xs ${notice.ok ? "text-emerald-300/80" : "text-red-300/80"}`}>
             {notice.msg}
+          </p>
+        ) : dirty ? (
+          <p role="status" className="text-xs text-amber-200/80">
+            cambios sin guardar
           </p>
         ) : null}
         <div className="flex gap-2">
@@ -457,14 +512,16 @@ export default function Editor({ canPublish, canUpload }: { canPublish: boolean;
           </button>
           <button
             onClick={canPublish ? (owned ? save : publish) : () => copy(encodedUrl(), "main")}
-            disabled={busy}
+            disabled={busy || (owned !== null && savedPrint !== null && !dirty)}
             className="flex-1 rounded-xl bg-white py-3 text-sm font-medium text-black transition-transform active:scale-[0.98] disabled:opacity-60"
           >
             {busy
               ? "…"
               : canPublish
                 ? owned
-                  ? "guardar cambios"
+                  ? savedPrint !== null && !dirty
+                    ? "guardado ✓"
+                    : "guardar cambios"
                   : "publicar"
                 : copied === "main"
                   ? "¡copiado!"
