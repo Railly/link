@@ -12,6 +12,9 @@ type Props = {
 
 /** Degrees of tilt from the resting position that sweep the full width/height. */
 const TILT_RANGE = 30;
+/** How far the pointer / tilt can push u_mouse from the centre (0.5 = full range). */
+const REACH = 0.18;
+const toMouse = (v: number) => 0.5 + (clamp01(v) - 0.5) * 2 * REACH;
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 
 type OrientationPermission = { requestPermission?: () => Promise<"granted" | "denied"> };
@@ -81,8 +84,8 @@ export default function ShaderCanvas({ shader, colors, speed = 1, className }: P
       const dt = Math.min((now - last) / 1000, 0.1);
       last = now;
       time += dt * live.current.speed;
-      mouse.x += (mouse.tx - mouse.x) * 0.04;
-      mouse.y += (mouse.ty - mouse.y) * 0.04;
+      mouse.x += (mouse.tx - mouse.x) * 0.03;
+      mouse.y += (mouse.ty - mouse.y) * 0.03;
       resize();
       gl.uniform2f(uRes, canvas.width, canvas.height);
       gl.uniform1f(uTime, time);
@@ -93,9 +96,11 @@ export default function ShaderCanvas({ shader, colors, speed = 1, className }: P
     };
 
     const onMove = (e: PointerEvent) => {
+      // Touch drags are scrolls; on phones only the tilt sensor moves the shader.
+      if (e.pointerType !== "mouse") return;
       const r = canvas.getBoundingClientRect();
-      mouse.tx = (e.clientX - r.left) / r.width;
-      mouse.ty = 1 - (e.clientY - r.top) / r.height;
+      mouse.tx = toMouse((e.clientX - r.left) / r.width);
+      mouse.ty = toMouse(1 - (e.clientY - r.top) / r.height);
     };
     // Phones: tilt drives the same uniform as the mouse, relative to how the phone is held.
     let rest: { beta: number; gamma: number } | null = null;
@@ -110,8 +115,8 @@ export default function ShaderCanvas({ shader, colors, speed = 1, className }: P
       const angle = screen.orientation?.angle ?? 0;
       if (angle === 90) [dx, dy] = [-dy, dx];
       else if (angle === 270) [dx, dy] = [dy, -dx];
-      mouse.tx = clamp01(0.5 + dx / (2 * TILT_RANGE));
-      mouse.ty = clamp01(0.5 + dy / (2 * TILT_RANGE));
+      mouse.tx = toMouse(0.5 + dx / (2 * TILT_RANGE));
+      mouse.ty = toMouse(0.5 + dy / (2 * TILT_RANGE));
     };
     const onRotate = () => (rest = null);
     const listenTilt = () => window.addEventListener("deviceorientation", onOrient);

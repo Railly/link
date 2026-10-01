@@ -64,8 +64,6 @@ void main() {
   float mask = smoothstep(-0.3, 0.7, n);
   col += u_c3 * (f1 * 0.7 + f2 * 0.35) * mask;
   col += u_c3 * 0.06 * smoothstep(0.4, 1.2, length(r));
-  vec2 m = (u_mouse - 0.5) * vec2(u_res.x / u_res.y, 1.0);
-  col += u_c3 * (f1 + f2) * exp(-dot(uv - m, uv - m) * 5.0) * 0.6;
   col *= 1.0 - 0.5 * dot(uv * 0.8, uv * 0.8);
   gl_FragColor = vec4(grain(col, 0.03), 1.0);
 }
@@ -125,7 +123,7 @@ void main() {
   vec2 w = uv + 0.25 * vec2(snoise(uv * 1.2 + t), snoise(uv * 1.2 - t + 4.0));
   vec2 b1 = vec2(sin(t * 1.1) * 0.6, cos(t * 0.9) * 0.4);
   vec2 b2 = vec2(cos(t * 0.7 + 2.0) * 0.7, sin(t * 1.3 + 1.0) * 0.5);
-  vec2 b3 = (u_mouse - 0.5) * vec2(u_res.x / u_res.y, 1.0) * 0.8;
+  vec2 b3 = vec2(sin(t * 0.8 + 4.0) * 0.5, cos(t * 1.2 + 3.0) * 0.4) + (u_mouse - 0.5) * 0.3;
   vec3 col = u_c1;
   col = mix(col, u_c2, smoothstep(0.9, 0.0, length(w - b1)));
   col = mix(col, u_c3, smoothstep(0.75, 0.0, length(w - b2)) * 0.9);
@@ -142,12 +140,11 @@ void main() {
   vec2 f = fract(gl_FragCoord.xy / cell) - 0.5;
   vec2 uv = (g * cell - 0.5 * u_res) / u_res.y;
   float t = u_time * 0.1;
-  // Parallax: the whole field slides with the pointer / phone tilt, not just the highlight.
+  // Parallax: the whole field slides with the pointer / phone tilt.
   vec2 shift = (u_mouse - 0.5) * 0.7;
   vec2 q = uv + shift;
   float n = fbm(q * 1.6 + vec2(t, -t * 0.6) + fbm(q * 2.0 - t) * 0.8);
-  float m = length(uv - (u_mouse - 0.5) * vec2(u_res.x / u_res.y, 1.0));
-  float v = clamp(n * 0.7 + 0.45 + smoothstep(0.6, 0.0, m) * 0.45, 0.0, 1.0);
+  float v = clamp(n * 0.7 + 0.45, 0.0, 1.0);
   float r = v * 0.5;
   float d = smoothstep(r, r - 1.5 / cell, length(f));
   vec3 dotCol = mix(u_c2, u_c3, smoothstep(0.4, 0.9, v));
@@ -157,12 +154,12 @@ void main() {
 `;
 
 
-/** Topographic contour lines; the pointer raises a hill under it. */
+/** Topographic contour lines over a slowly wandering hill. */
 const topo = `
 void main() {
-  vec2 uv = (gl_FragCoord.xy - 0.5 * u_res) / u_res.y;
-  vec2 m = (u_mouse - 0.5) * vec2(u_res.x / u_res.y, 1.0);
+  vec2 uv = (gl_FragCoord.xy - 0.5 * u_res) / u_res.y + (u_mouse - 0.5) * 0.15;
   float t = u_time * 0.04;
+  vec2 m = vec2(sin(t * 2.7) * 0.5, cos(t * 1.9) * 0.3);
   float h = fbm(uv * 1.0 + vec2(t, -t * 0.7)) * 0.8;
   h += 0.8 * exp(-dot(uv - m, uv - m) * 9.0);
   float lines = 13.0;
@@ -177,7 +174,7 @@ void main() {
 }
 `;
 
-/** 1-bit style ordered dithering of a moving light; the pointer is the lamp. */
+/** 1-bit style ordered dithering of a slowly wandering light. */
 const dither = `
 float bayer2(vec2 a) { a = floor(a); return fract(a.x * 0.5 + a.y * a.y * 0.75); }
 float bayer8(vec2 a) {
@@ -186,9 +183,9 @@ float bayer8(vec2 a) {
 void main() {
   float px = max(2.0, floor(u_res.y / 320.0));
   vec2 cell = floor(gl_FragCoord.xy / px);
-  vec2 uv = (cell * px - 0.5 * u_res) / u_res.y;
-  vec2 m = (u_mouse - 0.5) * vec2(u_res.x / u_res.y, 1.0);
+  vec2 uv = (cell * px - 0.5 * u_res) / u_res.y + (u_mouse - 0.5) * 0.15;
   float t = u_time * 0.08;
+  vec2 m = vec2(sin(t * 1.3) * 0.5, cos(t * 0.9) * 0.3);
   float v = 0.5 + 0.5 * fbm(uv * 1.1 + vec2(t, t * 0.6));
   v = v * 0.55 + exp(-dot(uv - m, uv - m) * 2.5) * 0.65 - 0.12;
   float lv = floor(clamp(v, 0.0, 0.999) * 2.0 + bayer8(cell));
@@ -197,7 +194,7 @@ void main() {
 }
 `;
 
-/** Underwater caustics from animated Voronoi edges; brightest near the pointer. */
+/** Underwater caustics from animated Voronoi edges, lit from above. */
 const caustics = `
 vec2 hash2(vec2 p) {
   p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)));
@@ -223,18 +220,17 @@ void main() {
   vec2 w = uv + 0.08 * vec2(snoise(uv * 2.0 + t * 0.2), snoise(uv * 2.0 - t * 0.2));
   float a = 1.0 - smoothstep(0.0, 0.09, edges(w * 3.5 + m * 0.4, t));
   float b = 1.0 - smoothstep(0.0, 0.07, edges(w * 6.0 - m * 0.6 + 3.1, t * 1.3));
-  float light = 0.55 + 0.9 * exp(-dot(uv - m, uv - m) * 2.0);
+  float light = 0.7 + 0.5 * smoothstep(-0.6, 0.6, uv.y);
   vec3 col = mix(u_c1, u_c2, smoothstep(-0.6, 0.7, uv.y + 0.2 * snoise(uv + t * 0.1)));
   col += u_c3 * (a * 0.7 + b * 0.35) * light;
   gl_FragColor = vec4(grain(col, 0.025), 1.0);
 }
 `;
 
-/** Oil-slick thin-film bands; the pointer rotates the light and shifts the film thickness. */
+/** Oil-slick thin-film bands; the pointer rotates the bands and shifts the film thickness. */
 const iridescent = `
 void main() {
   vec2 uv = (gl_FragCoord.xy - 0.5 * u_res) / u_res.y;
-  vec2 m = (u_mouse - 0.5) * vec2(u_res.x / u_res.y, 1.0);
   float t = u_time * 0.05;
   float ang = (u_mouse.x - 0.5) * 3.0 + 0.7;
   vec2 dir = vec2(cos(ang), sin(ang));
@@ -244,7 +240,6 @@ void main() {
   vec3 tint = mix(u_c2, u_c3, film.g) * 0.75 + film * 0.35;
   float slick = smoothstep(-0.35, 0.45, fbm(w * 0.9 - t * 0.7));
   vec3 col = mix(u_c1, tint, slick * 0.9);
-  col += u_c3 * 0.35 * exp(-dot(uv - m, uv - m) * 6.0);
   col *= 1.0 - 0.3 * dot(uv, uv);
   gl_FragColor = vec4(grain(col, 0.03), 1.0);
 }

@@ -14,8 +14,8 @@ const space = Space_Grotesk({ variable: "--font-space", subsets: ["latin"] });
 const syne = Syne({ variable: "--font-syne", subsets: ["latin"], weight: ["400", "700"] });
 
 export const metadata: Metadata = {
-  title: "linkmi — links con shaders",
-  description: "Tu página de links, gratis, con fondos en shaders y tipografía cuidada.",
+  title: "linkmi",
+  description: "Tu página de links.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

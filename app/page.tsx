@@ -36,7 +36,7 @@ export default function Home() {
             className="lp-rise mt-6 max-w-md text-[15px] leading-relaxed text-white/65"
             style={{ animationDelay: "80ms" }}
           >
-            Una página de links gratuita con fondos en shaders y tipografía cuidada. Elegí tu nombre, publicá y
+            Una página de links. Elegí tu nombre, publicá y
             listo: sin cuentas ni contraseñas.
           </p>
           <div className="lp-rise mt-10 flex flex-wrap gap-3" style={{ animationDelay: "160ms" }}>
