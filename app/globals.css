@@ -33,19 +33,28 @@ body {
   --plate: 0;
 }
 
-[data-shader="halftone"] {
+[data-shader="halftone"],
+[data-shader="dither"] {
   --scrim: 0.86;
   --plate: 0.82;
 }
 
+[data-shader="topo"],
+[data-shader="caustics"] {
+  --scrim: 0.55;
+  --plate: 0.45;
+}
+
 /* Small text gets a label-style plate; the large name only needs a glow. */
-[data-shader="halftone"] .lp-label {
+[data-shader="halftone"] .lp-label,
+[data-shader="dither"] .lp-label {
   background: rgb(var(--ink-inv) / 0.82);
   padding: 0.2rem 0.6rem;
   border-radius: 6px;
 }
 
-[data-shader="halftone"] h1 {
+[data-shader="halftone"] h1,
+[data-shader="dither"] h1 {
   text-shadow:
     0 0 24px rgb(var(--ink-inv)),
     0 0 12px rgb(var(--ink-inv)),

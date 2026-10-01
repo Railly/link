@@ -10,6 +10,12 @@ type Props = {
   className?: string;
 };
 
+/** Degrees of tilt from the resting position that sweep the full width/height. */
+const TILT_RANGE = 30;
+const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
+
+type OrientationPermission = { requestPermission?: () => Promise<"granted" | "denied"> };
+
 const hexToRgb = (hex: string) => {
   const n = parseInt(hex.slice(1), 16);
   return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255] as const;
@@ -36,6 +42,7 @@ export default function ShaderCanvas({ shader, colors, speed = 1, className }: P
     const gl = canvas.getContext("webgl", { antialias: false, premultipliedAlpha: false });
     if (!gl) return;
 
+    gl.getExtension("OES_standard_derivatives");
     const program = gl.createProgram()!;
     gl.attachShader(program, compile(gl, gl.VERTEX_SHADER, VERTEX));
     gl.attachShader(program, compile(gl, gl.FRAGMENT_SHADER, SHADERS[shader].frag));
@@ -90,6 +97,41 @@ export default function ShaderCanvas({ shader, colors, speed = 1, className }: P
       mouse.tx = (e.clientX - r.left) / r.width;
       mouse.ty = 1 - (e.clientY - r.top) / r.height;
     };
+    // Phones: tilt drives the same uniform as the mouse, relative to how the phone is held.
+    let rest: { beta: number; gamma: number } | null = null;
+    const onOrient = (e: DeviceOrientationEvent) => {
+      if (e.beta === null || e.gamma === null) return;
+      rest ??= { beta: e.beta, gamma: e.gamma };
+      // Slowly re-centre so a new grip becomes the neutral position.
+      rest.beta += (e.beta - rest.beta) * 0.003;
+      rest.gamma += (e.gamma - rest.gamma) * 0.003;
+      let dx = e.gamma - rest.gamma;
+      let dy = rest.beta - e.beta;
+      const angle = screen.orientation?.angle ?? 0;
+      if (angle === 90) [dx, dy] = [-dy, dx];
+      else if (angle === 270) [dx, dy] = [dy, -dx];
+      mouse.tx = clamp01(0.5 + dx / (2 * TILT_RANGE));
+      mouse.ty = clamp01(0.5 + dy / (2 * TILT_RANGE));
+    };
+    const onRotate = () => (rest = null);
+    const listenTilt = () => window.addEventListener("deviceorientation", onOrient);
+    // iOS only grants motion access from a user gesture, so ask on the first tap.
+    const askTilt = () => {
+      (DeviceOrientationEvent as unknown as OrientationPermission)
+        .requestPermission?.()
+        .then((state) => state === "granted" && listenTilt())
+        .catch(() => {});
+    };
+    const touch = window.matchMedia("(pointer: coarse)").matches && "DeviceOrientationEvent" in window;
+    if (touch && !reduced) {
+      if (typeof (DeviceOrientationEvent as unknown as OrientationPermission).requestPermission === "function") {
+        window.addEventListener("pointerdown", askTilt, { once: true });
+      } else {
+        listenTilt();
+      }
+      screen.orientation?.addEventListener("change", onRotate);
+    }
+
     const onVisibility = () => {
       cancelAnimationFrame(raf);
       if (!document.hidden) {
@@ -111,6 +153,9 @@ export default function ShaderCanvas({ shader, colors, speed = 1, className }: P
       cancelAnimationFrame(raf);
       ro.disconnect();
       window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerdown", askTilt);
+      window.removeEventListener("deviceorientation", onOrient);
+      screen.orientation?.removeEventListener("change", onRotate);
       document.removeEventListener("visibilitychange", onVisibility);
       gl.deleteProgram(program);
       gl.deleteBuffer(buf);

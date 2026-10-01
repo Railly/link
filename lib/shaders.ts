@@ -1,4 +1,7 @@
-export type ShaderId = "micelio" | "aurora" | "liquid" | "mesh" | "halftone";
+export const SHADER_IDS = [
+  "micelio", "aurora", "liquid", "mesh", "halftone", "topo", "dither", "caustics", "iridescent",
+] as const;
+export type ShaderId = (typeof SHADER_IDS)[number];
 
 export const VERTEX = `
 attribute vec2 a_pos;
@@ -61,6 +64,8 @@ void main() {
   float mask = smoothstep(-0.3, 0.7, n);
   col += u_c3 * (f1 * 0.7 + f2 * 0.35) * mask;
   col += u_c3 * 0.06 * smoothstep(0.4, 1.2, length(r));
+  vec2 m = (u_mouse - 0.5) * vec2(u_res.x / u_res.y, 1.0);
+  col += u_c3 * (f1 + f2) * exp(-dot(uv - m, uv - m) * 5.0) * 0.6;
   col *= 1.0 - 0.5 * dot(uv * 0.8, uv * 0.8);
   gl_FragColor = vec4(grain(col, 0.03), 1.0);
 }
@@ -79,7 +84,8 @@ void main() {
     float y = uv.y - 0.55 + fi * 0.06
       - 0.12 * sin(p.x * (1.5 + fi * 0.4) + t * (1.0 + fi * 0.3) + fi * 1.7)
       - 0.10 * snoise(vec2(p.x * 1.2 + t * 0.5, fi * 3.1 + t * 0.2))
-      - (u_mouse.y - 0.5) * 0.05;
+      - (u_mouse.y - 0.5) * 0.12
+      - (u_mouse.x - 0.5) * 0.15 * sin(p.x * 2.0 + fi);
     float w = 5.0 + fi * 2.5;
     float band = exp(-pow(y * w, 2.0));
     float rays = 0.6 + 0.4 * snoise(vec2(p.x * 18.0, t + fi));
@@ -147,10 +153,111 @@ void main() {
 }
 `;
 
+
+/** Topographic contour lines; the pointer raises a hill under it. */
+const topo = `
+void main() {
+  vec2 uv = (gl_FragCoord.xy - 0.5 * u_res) / u_res.y;
+  vec2 m = (u_mouse - 0.5) * vec2(u_res.x / u_res.y, 1.0);
+  float t = u_time * 0.04;
+  float h = fbm(uv * 1.0 + vec2(t, -t * 0.7)) * 0.8;
+  h += 0.8 * exp(-dot(uv - m, uv - m) * 9.0);
+  float lines = 13.0;
+  float level = h * lines;
+  float dist = abs(fract(level - 0.5) - 0.5) / max(fwidth(level), 1e-4);
+  float major = step(mod(floor(level + 0.5), 5.0), 0.5);
+  float line = 1.0 - smoothstep(0.5, 1.0 + major * 0.6, dist);
+  vec3 col = mix(u_c1, u_c2, smoothstep(-0.6, 0.9, h) * 0.55);
+  col += u_c3 * line * mix(0.32, 0.9, major);
+  col *= 1.0 - 0.35 * dot(uv, uv);
+  gl_FragColor = vec4(grain(col, 0.025), 1.0);
+}
+`;
+
+/** 1-bit style ordered dithering of a moving light; the pointer is the lamp. */
+const dither = `
+float bayer2(vec2 a) { a = floor(a); return fract(a.x * 0.5 + a.y * a.y * 0.75); }
+float bayer8(vec2 a) {
+  return bayer2(0.25 * a) * 0.0625 + bayer2(0.5 * a) * 0.25 + bayer2(a);
+}
+void main() {
+  float px = max(2.0, floor(u_res.y / 320.0));
+  vec2 cell = floor(gl_FragCoord.xy / px);
+  vec2 uv = (cell * px - 0.5 * u_res) / u_res.y;
+  vec2 m = (u_mouse - 0.5) * vec2(u_res.x / u_res.y, 1.0);
+  float t = u_time * 0.08;
+  float v = 0.5 + 0.5 * fbm(uv * 1.1 + vec2(t, t * 0.6));
+  v = v * 0.55 + exp(-dot(uv - m, uv - m) * 2.5) * 0.65 - 0.12;
+  float lv = floor(clamp(v, 0.0, 0.999) * 2.0 + bayer8(cell));
+  vec3 col = lv < 0.5 ? u_c1 : (lv < 1.5 ? u_c2 : u_c3);
+  gl_FragColor = vec4(col, 1.0);
+}
+`;
+
+/** Underwater caustics from animated Voronoi edges; brightest near the pointer. */
+const caustics = `
+vec2 hash2(vec2 p) {
+  p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)));
+  return fract(sin(p) * 43758.5453);
+}
+float edges(vec2 p, float t) {
+  vec2 i = floor(p), f = fract(p);
+  float f1 = 8.0, f2 = 8.0;
+  for (int y = -1; y <= 1; y++) {
+    for (int x = -1; x <= 1; x++) {
+      vec2 g = vec2(float(x), float(y));
+      vec2 o = 0.5 + 0.45 * sin(t + 6.2831 * hash2(i + g));
+      float d = length(g + o - f);
+      if (d < f1) { f2 = f1; f1 = d; } else if (d < f2) { f2 = d; }
+    }
+  }
+  return f2 - f1;
+}
+void main() {
+  vec2 uv = (gl_FragCoord.xy - 0.5 * u_res) / u_res.y;
+  vec2 m = (u_mouse - 0.5) * vec2(u_res.x / u_res.y, 1.0);
+  float t = u_time * 0.5;
+  vec2 w = uv + 0.08 * vec2(snoise(uv * 2.0 + t * 0.2), snoise(uv * 2.0 - t * 0.2));
+  float a = 1.0 - smoothstep(0.0, 0.09, edges(w * 3.5 + m * 0.4, t));
+  float b = 1.0 - smoothstep(0.0, 0.07, edges(w * 6.0 - m * 0.6 + 3.1, t * 1.3));
+  float light = 0.55 + 0.9 * exp(-dot(uv - m, uv - m) * 2.0);
+  vec3 col = mix(u_c1, u_c2, smoothstep(-0.6, 0.7, uv.y + 0.2 * snoise(uv + t * 0.1)));
+  col += u_c3 * (a * 0.7 + b * 0.35) * light;
+  gl_FragColor = vec4(grain(col, 0.025), 1.0);
+}
+`;
+
+/** Oil-slick thin-film bands; the pointer rotates the light and shifts the film thickness. */
+const iridescent = `
+void main() {
+  vec2 uv = (gl_FragCoord.xy - 0.5 * u_res) / u_res.y;
+  vec2 m = (u_mouse - 0.5) * vec2(u_res.x / u_res.y, 1.0);
+  float t = u_time * 0.05;
+  float ang = (u_mouse.x - 0.5) * 3.0 + 0.7;
+  vec2 dir = vec2(cos(ang), sin(ang));
+  vec2 w = uv + 0.35 * vec2(fbm(uv * 1.1 + t), fbm(uv * 1.1 - t + 5.0));
+  float h = dot(w, dir) * 2.2 + (u_mouse.y - 0.5) * 1.5;
+  vec3 film = 0.5 + 0.5 * cos(6.2831 * (h + vec3(0.0, 0.33, 0.67)));
+  vec3 tint = mix(u_c2, u_c3, film.g) * 0.75 + film * 0.35;
+  float slick = smoothstep(-0.35, 0.45, fbm(w * 0.9 - t * 0.7));
+  vec3 col = mix(u_c1, tint, slick * 0.9);
+  col += u_c3 * 0.35 * exp(-dot(uv - m, uv - m) * 6.0);
+  col *= 1.0 - 0.3 * dot(uv, uv);
+  gl_FragColor = vec4(grain(col, 0.03), 1.0);
+}
+`;
+
+/** fwidth() needs this extension in WebGL1; ShaderCanvas enables it before compiling. */
+const DERIVATIVES = "#extension GL_OES_standard_derivatives : enable\n";
+
 export const SHADERS: Record<ShaderId, { label: string; frag: string; palette: [string, string, string] }> = {
   micelio: { label: "Micelio", frag: HEADER + micelio, palette: ["#07060b", "#3b1d5e", "#c9a7ff"] },
   aurora: { label: "Aurora", frag: HEADER + aurora, palette: ["#030712", "#14b8a6", "#a78bfa"] },
   liquid: { label: "Cromo líquido", frag: HEADER + liquid, palette: ["#0b0b0f", "#5b5f6b", "#e8ecf4"] },
   mesh: { label: "Gradiente", frag: HEADER + mesh, palette: ["#120a1f", "#ff5e3a", "#ffc2e2"] },
   halftone: { label: "Halftone", frag: HEADER + halftone, palette: ["#0a0a0a", "#2b2b2b", "#d4ff3a"] },
+  topo: { label: "Topografía", frag: DERIVATIVES + HEADER + topo, palette: ["#0b0d0c", "#1d2b24", "#9ff2c7"] },
+  dither: { label: "Dither", frag: HEADER + dither, palette: ["#0c0b10", "#3a2f6b", "#ff8a5c"] },
+  caustics: { label: "Cáusticas", frag: HEADER + caustics, palette: ["#031018", "#0b3a4a", "#9be7ff"] },
+  iridescent: { label: "Iridiscente", frag: HEADER + iridescent, palette: ["#08080c", "#ff7ad9", "#6ee7ff"] },
 };

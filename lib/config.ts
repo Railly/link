@@ -1,4 +1,4 @@
-import type { ShaderId } from "./shaders";
+import { SHADER_IDS, type ShaderId } from "./shaders";
 
 export type FontId = "editorial" | "mono" | "grotesk" | "syne";
 export type ButtonStyle = "glass" | "solid" | "outline" | "line";
@@ -101,7 +101,7 @@ export function normalizeConfig(input: unknown): PageConfig {
     bio: str(c.bio, 300, d.bio),
     avatar: sanitizeAvatar(str(c.avatar, 2000)),
     links,
-    shader: oneOf(c.shader, ["micelio", "aurora", "liquid", "mesh", "halftone"] as const, d.shader),
+    shader: oneOf<ShaderId>(c.shader, SHADER_IDS, d.shader),
     colors,
     speed: typeof c.speed === "number" ? Math.min(3, Math.max(0, c.speed)) : d.speed,
     font: oneOf(c.font, Object.keys(FONTS) as FontId[], d.font),
