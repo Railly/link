@@ -2,7 +2,7 @@
 
 A free link-in-bio page with hand-written WebGL shader backgrounds, careful typography and no accounts.
 
-**Live:** [linkmi.ar](https://linkmi.ar) · **Example:** [linkmi.ar/sofiaferro](https://linkmi.ar/sofiaferro)
+**Live:** [linkmi.ar](https://linkmi.ar) · **Example:** [linkmi.ar/sofiferro](https://linkmi.ar/sofiferro)
 
 - 5 shaders (micelio, aurora, liquid chrome, mesh gradient, halftone) with custom colours and speed
 - 4 type pairings, 4 button styles, adjustable corners
@@ -46,9 +46,10 @@ Without Redis env vars the app still runs: the editor offers encoded links and c
 ## Admin scripts
 
 ```bash
-node --env-file=.env.local scripts/seed.mjs sofiaferro        # seed a page, prints its edit link once
-node --env-file=.env.local scripts/seed.mjs sofiaferro --rotate  # overwrite and issue a new edit link
+node --env-file=.env.local scripts/seed.mjs sofiferro        # seed a page, prints its edit link once
+node --env-file=.env.local scripts/seed.mjs sofiferro --rotate  # overwrite and issue a new edit link
 node --env-file=.env.local scripts/takedown.mjs <handle>      # remove a page and purge its cache
+node --env-file=.env.local scripts/rename.mjs <old> <new>     # move a page to a new handle, same edit link
 ```
 
 ## License

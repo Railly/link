@@ -4,7 +4,7 @@ import { createHash, randomBytes } from "node:crypto";
 import { SOFIA } from "../lib/sofia.ts";
 import { redis } from "./redis.mjs";
 
-const handle = process.argv.find((a, i) => i > 1 && !a.startsWith("--")) ?? "sofiaferro";
+const handle = process.argv.find((a, i) => i > 1 && !a.startsWith("--")) ?? "sofiferro";
 const rotate = process.argv.includes("--rotate");
 const editToken = randomBytes(24).toString("base64url");
 const hash = createHash("sha256").update(editToken).digest("hex");

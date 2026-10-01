@@ -18,7 +18,7 @@ export default function Home() {
       <main className="relative mx-auto flex min-h-dvh max-w-3xl flex-col px-4 py-8 sm:px-8">
         <nav className="flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.2em] text-white/60">
           <span>linkmi</span>
-          <Link href="/sofiaferro" className="transition-colors hover:text-white">
+          <Link href="/sofiferro" className="transition-colors hover:text-white">
             ejemplo ↗
           </Link>
         </nav>
@@ -44,7 +44,7 @@ export default function Home() {
               crear mi página
             </Link>
             <Link
-              href="/sofiaferro"
+              href="/sofiferro"
               className="lp-glass rounded-full px-6 py-3 text-sm text-white [--ink:255_255_255]"
             >
               ver un ejemplo

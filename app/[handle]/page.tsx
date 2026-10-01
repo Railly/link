@@ -6,7 +6,7 @@ import { handleError, normalizeHandle } from "@/lib/handles";
 import { getPage } from "@/lib/store";
 
 export async function generateStaticParams() {
-  return [{ handle: "sofiaferro" }];
+  return [{ handle: "sofiferro" }];
 }
 
 async function resolve(params: PageProps<"/[handle]">["params"]) {
