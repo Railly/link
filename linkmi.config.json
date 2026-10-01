@@ -3,36 +3,157 @@
   "bio": "Software engineer en Vercel Labs. Founder de Crafter Station. Open source y AI.",
   "avatar": "/avatar.jpg",
   "links": [
-    { "id": "substack", "title": "Newsletter en Substack", "url": "https://railly.substack.com" },
-    { "id": "web", "title": "railly.dev", "url": "https://www.railly.dev/" },
-    { "id": "youtube", "title": "YouTube", "url": "https://www.youtube.com/@raillydev" },
-    { "id": "instagram", "title": "Instagram", "url": "https://www.instagram.com/railly.dev/" },
-    { "id": "x", "title": "X / Twitter", "url": "https://x.com/raillyhugo" },
-    { "id": "tiktok", "title": "TikTok", "url": "https://www.tiktok.com/@railly.dev" },
-    { "id": "github", "title": "GitHub", "url": "https://github.com/railly" },
-    { "id": "linkedin", "title": "LinkedIn", "url": "https://linkedin.com/in/raillyhugo" },
-    { "id": "v0", "title": "v0", "url": "https://v0.app/@railly" },
-    { "id": "writing", "title": "Writing", "url": "https://www.railly.dev/writing" },
-    { "id": "mentoring", "title": "Mentorías", "url": "https://www.railly.dev/mentoring" },
-    { "id": "developers", "title": "Developer resources", "url": "https://www.railly.dev/developers" },
-    { "id": "crafter", "title": "Crafter Station", "url": "https://crafterstation.com/" },
-    { "id": "research", "title": "Crafter Research", "url": "https://research.crafter.ing/" },
-    { "id": "petdex", "title": "Petdex", "url": "https://petdex.dev/" },
-    { "id": "agentfiles", "title": "Agentfiles", "url": "https://agentfiles.crafter.run/" },
-    { "id": "tinte", "title": "Tinte", "url": "https://tinte.dev/" },
-    { "id": "elements", "title": "Elements", "url": "https://tryelements.dev/" },
-    { "id": "text0", "title": "text0", "url": "https://text0.dev/" },
-    { "id": "onehunter", "title": "One Hunter Theme", "url": "https://marketplace.visualstudio.com/items?itemName=RaillyHugo.one-hunter" },
-    { "id": "hack0", "title": "hack0", "url": "https://hack0.dev/" },
-    { "id": "projects", "title": "Todos los proyectos", "url": "https://www.railly.dev/projects" },
-    { "id": "email", "title": "hi@railly.dev", "url": "mailto:hi@railly.dev" }
+    {
+      "id": "substack",
+      "title": "Newsletter en Substack",
+      "url": "https://railly.substack.com",
+      "note": "Código, ideas y lo que voy aprendiendo"
+    },
+    {
+      "id": "youtube",
+      "title": "YouTube",
+      "url": "https://www.youtube.com/@raillydev",
+      "group": "Conectemos",
+      "note": "@raillydev"
+    },
+    {
+      "id": "instagram",
+      "title": "Instagram",
+      "url": "https://www.instagram.com/railly.dev/",
+      "note": "@railly.dev"
+    },
+    {
+      "id": "x",
+      "title": "X / Twitter",
+      "url": "https://x.com/raillyhugo",
+      "note": "@raillyhugo"
+    },
+    {
+      "id": "tiktok",
+      "title": "TikTok",
+      "url": "https://www.tiktok.com/@railly.dev",
+      "note": "@railly.dev"
+    },
+    {
+      "id": "github",
+      "title": "GitHub",
+      "url": "https://github.com/railly",
+      "note": "@railly"
+    },
+    {
+      "id": "linkedin",
+      "title": "LinkedIn",
+      "url": "https://linkedin.com/in/raillyhugo",
+      "note": "Railly Hugo"
+    },
+    {
+      "id": "v0",
+      "title": "v0",
+      "url": "https://v0.app/@railly",
+      "note": "@railly"
+    },
+    {
+      "id": "email",
+      "title": "hi@railly.dev",
+      "url": "mailto:hi@railly.dev"
+    },
+    {
+      "id": "web",
+      "title": "railly.dev",
+      "url": "https://www.railly.dev/",
+      "group": "Mi rincón",
+      "note": "Mi web, notas y experimentos"
+    },
+    {
+      "id": "writing",
+      "title": "Writing",
+      "url": "https://www.railly.dev/writing",
+      "note": "Lo que voy aprendiendo"
+    },
+    {
+      "id": "mentoring",
+      "title": "Mentorías",
+      "url": "https://www.railly.dev/mentoring",
+      "note": "Aprendamos construyendo"
+    },
+    {
+      "id": "developers",
+      "title": "Developer resources",
+      "url": "https://www.railly.dev/developers",
+      "note": "Herramientas para construir"
+    },
+    {
+      "id": "crafter",
+      "title": "Crafter Station",
+      "url": "https://crafterstation.com/",
+      "group": "En comunidad",
+      "note": "La comunidad que estamos construyendo"
+    },
+    {
+      "id": "research",
+      "title": "Crafter Research",
+      "url": "https://research.crafter.ing/",
+      "note": "AI research y tecnología cívica"
+    },
+    {
+      "id": "petdex",
+      "title": "Petdex",
+      "url": "https://petdex.dev/",
+      "group": "Lo que construyo",
+      "note": "Compañeros para tu coding agent"
+    },
+    {
+      "id": "agentfiles",
+      "title": "Agentfiles",
+      "url": "https://agentfiles.crafter.run/",
+      "note": "Tus archivos de agentes, en un lugar"
+    },
+    {
+      "id": "tinte",
+      "title": "Tinte",
+      "url": "https://tinte.dev/",
+      "note": "Design systems para agentes"
+    },
+    {
+      "id": "elements",
+      "title": "Elements",
+      "url": "https://tryelements.dev/",
+      "note": "Componentes full-stack para auth y AI"
+    },
+    {
+      "id": "text0",
+      "title": "text0",
+      "url": "https://text0.dev/",
+      "note": "Autocompletado personal con AI"
+    },
+    {
+      "id": "onehunter",
+      "title": "One Hunter Theme",
+      "url": "https://marketplace.visualstudio.com/items?itemName=RaillyHugo.one-hunter",
+      "note": "Mi tema para VS Code"
+    },
+    {
+      "id": "hack0",
+      "title": "hack0",
+      "url": "https://hack0.dev/",
+      "note": "Hackathons y eventos tech en LATAM"
+    },
+    {
+      "id": "projects",
+      "title": "Todos los proyectos",
+      "url": "https://www.railly.dev/projects"
+    }
   ],
-  "shader": "micelio",
-  "colors": ["#07060b", "#3b1d5e", "#c9a7ff"],
+  "shader": "dotgrid",
+  "colors": [
+    "#111111",
+    "#525252",
+    "#a3a3a3"
+  ],
   "speed": 1,
-  "font": "editorial",
-  "button": "glass",
-  "radius": 14,
+  "font": "railly",
+  "button": "outline",
+  "radius": 5,
   "ink": "light",
-  "showIndex": true
+  "showIndex": false
 }

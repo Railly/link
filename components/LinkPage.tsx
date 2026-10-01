@@ -3,6 +3,7 @@
 import Link from "next/link";
 import ShaderCanvas from "./ShaderCanvas";
 import { FONTS, sanitizeUrl, type PageConfig } from "@/lib/config";
+import { LinkIcon } from "@/lib/icons";
 
 type Props = {
   config: PageConfig;
@@ -75,28 +76,43 @@ export default function LinkPage({ config, contained = false, footer = true, rep
           </p>
         ) : null}
 
-        <ul className={`mt-10 flex w-full flex-col ${config.button === "line" ? "gap-0" : "gap-3"}`}>
-          {links.map((l, i) => (
-            <li key={l.id} className="lp-rise" style={{ animationDelay: `${160 + i * 45}ms` }}>
-              <a
-                href={l.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`lp-btn lp-${config.button} group flex min-h-14 items-center gap-4 px-5 py-3 text-[14px]`}
-              >
-                {config.showIndex ? (
-                  <span className="w-5 shrink-0 font-mono text-[10px] tabular-nums opacity-50">
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                ) : null}
-                <span className="line-clamp-2 flex-1 text-balance break-words">{l.title}</span>
-                <span aria-hidden className="lp-arrow shrink-0 text-[13px] opacity-50">
-                  ↗
-                </span>
-              </a>
-            </li>
-          ))}
-        </ul>
+        {groupLinks(links).map((section) => (
+          <section key={section.key} className="mt-10 w-full">
+            {section.title ? (
+              <h2 className="lp-rise lp-label mb-3 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.12em] text-[rgb(var(--ink)/0.55)]">
+                <span className="tabular-nums">{String(section.number).padStart(2, "0")}</span>
+                <span aria-hidden>/</span>
+                <span>{section.title}</span>
+              </h2>
+            ) : null}
+            <ul className={`flex w-full flex-col ${config.button === "line" ? "gap-0" : "gap-3"}`}>
+              {section.items.map(({ link: l, index: i }) => (
+                <li key={l.id} className="lp-rise" style={{ animationDelay: `${160 + i * 45}ms` }}>
+                  <a
+                    href={l.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`lp-btn lp-${config.button} group flex min-h-14 items-center gap-4 px-5 py-3 text-[14px]`}
+                  >
+                    {config.showIndex ? (
+                      <span className="w-5 shrink-0 font-mono text-[10px] tabular-nums opacity-50">
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                    ) : null}
+                    <LinkIcon href={l.href} />
+                    <span className="flex flex-1 flex-col">
+                      <span className="line-clamp-2 text-balance break-words">{l.title}</span>
+                      {l.note ? <span className="text-[12px] opacity-55">{l.note}</span> : null}
+                    </span>
+                    <span aria-hidden className="lp-arrow shrink-0 text-[13px] opacity-50">
+                      ↗
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
 
         {footer ? (
           <div className="mt-auto pt-16 font-mono text-[10px] uppercase tracking-[0.2em]">
@@ -119,4 +135,18 @@ export default function LinkPage({ config, contained = false, footer = true, rep
       </div>
     </div>
   );
+}
+
+type Resolved = PageConfig["links"][number] & { href: string };
+
+/** Splits links into sections: a link with `group` opens a new section that runs until the next one. */
+function groupLinks(links: Resolved[]) {
+  const sections: { key: string; title?: string; number: number; items: { link: Resolved; index: number }[] }[] = [];
+  links.forEach((link, index) => {
+    if (link.group || sections.length === 0) {
+      sections.push({ key: link.id, title: link.group, number: sections.filter((x) => x.title).length + (link.group ? 1 : 0), items: [] });
+    }
+    sections[sections.length - 1].items.push({ link, index });
+  });
+  return sections;
 }

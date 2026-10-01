@@ -1,5 +1,5 @@
 export const SHADER_IDS = [
-  "micelio", "aurora", "liquid", "mesh", "halftone", "topo", "dither", "caustics", "iridescent",
+  "micelio", "aurora", "liquid", "mesh", "halftone", "topo", "dither", "caustics", "iridescent", "dotgrid",
 ] as const;
 export type ShaderId = (typeof SHADER_IDS)[number];
 
@@ -248,6 +248,26 @@ void main() {
 /** fwidth() needs this extension in WebGL1; ShaderCanvas enables it before compiling. */
 const DERIVATIVES = "#extension GL_OES_standard_derivatives : enable\n";
 
+/** Sparse dot grid that breathes with slow noise, in the railly.dev monochrome palette. */
+const dotgrid = `
+void main() {
+  float cell = 22.0 * max(1.0, u_res.y / 1100.0);
+  vec2 g = floor(gl_FragCoord.xy / cell);
+  vec2 f = fract(gl_FragCoord.xy / cell) - 0.5;
+  vec2 uv = (g * cell - 0.5 * u_res) / u_res.y;
+  float t = u_time * 0.05;
+  vec2 q = uv + (u_mouse - 0.5) * 0.15;
+  float n = clamp(fbm(q * 1.3 + vec2(t, -t * 0.7)) * 0.8 + 0.5, 0.0, 1.0);
+  // Edges stay brighter than the centre so the links read cleanly, like the old CSS mask.
+  float edge = smoothstep(0.15, 0.85, abs(gl_FragCoord.x / u_res.x - 0.5) * 2.0);
+  float lum = mix(0.25, 1.0, n) * mix(0.35, 1.0, edge);
+  float r = mix(0.05, 0.11, n);
+  float d = smoothstep(r, r - 1.2 / cell, length(f));
+  vec3 col = mix(u_c1, mix(u_c2, u_c3, lum), d * lum);
+  gl_FragColor = vec4(grain(col, 0.015), 1.0);
+}
+`;
+
 export const SHADERS: Record<ShaderId, { label: string; frag: string; palette: [string, string, string] }> = {
   micelio: { label: "Micelio", frag: HEADER + micelio, palette: ["#07060b", "#3b1d5e", "#c9a7ff"] },
   aurora: { label: "Aurora", frag: HEADER + aurora, palette: ["#030712", "#14b8a6", "#a78bfa"] },
@@ -258,4 +278,5 @@ export const SHADERS: Record<ShaderId, { label: string; frag: string; palette: [
   dither: { label: "Dither", frag: HEADER + dither, palette: ["#0c0b10", "#3a2f6b", "#ff8a5c"] },
   caustics: { label: "Cáusticas", frag: HEADER + caustics, palette: ["#031018", "#0b3a4a", "#9be7ff"] },
   iridescent: { label: "Iridiscente", frag: HEADER + iridescent, palette: ["#08080c", "#ff7ad9", "#6ee7ff"] },
+  dotgrid: { label: "Grilla", frag: HEADER + dotgrid, palette: ["#111111", "#525252", "#a3a3a3"] },
 };

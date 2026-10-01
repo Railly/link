@@ -1,10 +1,11 @@
 import { SHADER_IDS, type ShaderId } from "./shaders";
 
-export type FontId = "editorial" | "mono" | "grotesk" | "syne";
+export type FontId = "editorial" | "mono" | "grotesk" | "syne" | "railly";
 export type ButtonStyle = "glass" | "solid" | "outline" | "line";
 export type Ink = "light" | "dark";
 
-export type LinkItem = { id: string; title: string; url: string };
+/** `group` starts a titled section; `note` is a short secondary line. */
+export type LinkItem = { id: string; title: string; url: string; group?: string; note?: string };
 
 export type PageConfig = {
   name: string;
@@ -26,6 +27,7 @@ export const FONTS: Record<FontId, { label: string; display: string; body: strin
   mono: { label: "Terminal", display: "var(--font-geist-mono)", body: "var(--font-geist-mono)", italic: false },
   grotesk: { label: "Grotesk", display: "var(--font-space)", body: "var(--font-space)", italic: false },
   syne: { label: "Syne", display: "var(--font-syne)", body: "var(--font-geist)", italic: false },
+  railly: { label: "Railly", display: "Redaction, Georgia, serif", body: "RaillySans, var(--font-geist)", italic: false },
 };
 
 export const BUTTONS: Record<ButtonStyle, string> = {
@@ -94,6 +96,8 @@ export function normalizeConfig(input: unknown): PageConfig {
         id: str(l?.id, 20) || uid(),
         title: str(l?.title, 120),
         url: str(l?.url, 2000),
+        ...(str(l?.group, 60) ? { group: str(l?.group, 60) } : {}),
+        ...(str(l?.note, 120) ? { note: str(l?.note, 120) } : {}),
       }))
     : d.links;
   return {

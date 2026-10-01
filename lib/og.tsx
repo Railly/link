@@ -10,6 +10,7 @@ const DISPLAY: Record<FontId, { family: string; query: string; style: "normal" |
   mono: { family: "Geist Mono", query: "wght@400", style: "normal", weight: 400 },
   grotesk: { family: "Space Grotesk", query: "wght@500", style: "normal", weight: 400 },
   syne: { family: "Syne", query: "wght@700", style: "normal", weight: 700 },
+  railly: { family: "Instrument Serif", query: "ital@0", style: "normal", weight: 400 },
 };
 
 /** Fetches a TTF subset with only the glyphs in `text`. Throws on failure so a miss is never cached. */
