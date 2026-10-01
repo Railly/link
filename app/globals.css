@@ -1,26 +1,120 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-geist);
   --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-instrument);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  background: #07060b;
+  color: #f4f2f7;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- link page ---------- */
+
+@keyframes lp-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+    filter: blur(4px);
+  }
+}
+
+.lp-rise {
+  animation: lp-rise 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.lp-btn {
+  border-radius: var(--radius);
+  transition:
+    background-color 200ms ease,
+    border-color 200ms ease,
+    transform 160ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.lp-btn:active {
+  transform: scale(0.98);
+}
+
+.lp-btn:focus-visible {
+  outline: 2px solid rgb(var(--ink) / 0.8);
+  outline-offset: 3px;
+}
+
+.lp-arrow {
+  transition:
+    transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 200ms ease;
+}
+
+.lp-glass {
+  background:
+    linear-gradient(rgb(var(--ink) / 0.07), rgb(var(--ink) / 0.07)),
+    rgb(var(--ink-inv, 12 12 14) / 0.3);
+  border: 1px solid rgb(var(--ink) / 0.14);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08);
+}
+
+.lp-solid {
+  background: rgb(var(--ink) / 0.92);
+  color: rgb(var(--ink-inv));
+}
+
+.lp-outline {
+  border: 1px solid rgb(var(--ink) / 0.5);
+}
+
+.lp-line {
+  border-radius: 0;
+  border-bottom: 1px solid rgb(var(--ink) / 0.18);
+  padding-inline: 0.25rem;
+}
+
+li:first-child > .lp-line {
+  border-top: 1px solid rgb(var(--ink) / 0.18);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .lp-glass:hover {
+    background:
+      linear-gradient(rgb(var(--ink) / 0.13), rgb(var(--ink) / 0.13)),
+      rgb(var(--ink-inv, 12 12 14) / 0.3);
+    border-color: rgb(var(--ink) / 0.28);
+  }
+  .lp-solid:hover {
+    background: rgb(var(--ink) / 0.8);
+  }
+  .lp-outline:hover {
+    background: rgb(var(--ink) / 0.08);
+  }
+  .lp-line:hover {
+    background: rgb(var(--ink) / 0.05);
+  }
+  .lp-btn:hover .lp-arrow {
+    transform: translate(2px, -2px);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lp-rise {
+    animation: none;
+  }
+  .lp-btn,
+  .lp-arrow {
+    transition: none;
+  }
 }

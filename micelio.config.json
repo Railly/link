@@ -1,0 +1,17 @@
+{
+  "name": "tu nombre",
+  "bio": "editá micelio.config.json o diseñá tu página en /editor y descargá la config",
+  "avatar": "",
+  "links": [
+    { "id": "1", "title": "portfolio", "url": "https://example.com" },
+    { "id": "2", "title": "instagram", "url": "https://instagram.com" }
+  ],
+  "shader": "micelio",
+  "colors": ["#07060b", "#3b1d5e", "#c9a7ff"],
+  "speed": 1,
+  "font": "editorial",
+  "button": "glass",
+  "radius": 14,
+  "ink": "light",
+  "showIndex": true
+}

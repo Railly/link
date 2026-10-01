@@ -1,36 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# linkmicelio
 
-## Getting Started
+A free link-in-bio page with hand-written WebGL shader backgrounds, careful typography and no accounts.
 
-First, run the development server:
+**Live:** [linkmicelio.vercel.app](https://linkmicelio.vercel.app) · **Example:** [linkmicelio.vercel.app/sofiaferro](https://linkmicelio.vercel.app/sofiaferro)
+
+- 5 shaders (micelio, aurora, liquid chrome, mesh gradient, halftone) with custom colours and speed
+- 4 type pairings, 4 button styles, adjustable corners
+- One-click import from a public Linktree profile
+- Editing without accounts: publishing gives you a secret edit link
+
+## Three ways to use it
+
+1. **Hosted page** — open [`/editor`](https://linkmicelio.vercel.app/editor), pick a name and publish. You get `linkmicelio.vercel.app/yourname` plus a private edit link. Keep the edit link safe: it is the only way to edit the page.
+2. **Encoded link** — "link sin cuenta" in the editor puts the whole page inside the URL (`/p#…`). Nothing is stored anywhere.
+3. **Your own deploy** — fork it and serve a single page from `micelio.config.json`, with no database:
+
+   [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fsofiaferro%2Flinkmicelio&env=MICELIO_MODE&envDescription=Set%20to%20%22single%22%20to%20serve%20only%20your%20own%20page&project-name=my-links)
+
+   Set `MICELIO_MODE=single`, design your page in `/editor`, click "descargar config" and replace `micelio.config.json` with the downloaded file.
+
+## Stack
+
+Next.js 16 (App Router, Cache Components) on Vercel · Upstash Redis for hosted pages · Vercel Blob for avatar uploads · raw WebGL, no 3D libraries.
+
+## Running locally
 
 ```bash
+npm install
+vercel link && vercel env pull   # optional: only needed for hosted pages and uploads
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Without Redis env vars the app still runs: the editor offers encoded links and config download instead of publishing.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variable | Purpose |
+| --- | --- |
+| `KV_REST_API_URL`, `KV_REST_API_TOKEN` | Upstash Redis (hosted pages) |
+| `BLOB_READ_WRITE_TOKEN` | Vercel Blob (avatar uploads, public store) |
+| `ADMIN_SECRET` | Authorises cache purges from `scripts/takedown.mjs` |
+| `MICELIO_MODE` | `single` serves `micelio.config.json` at `/` |
+| `MICELIO_REPORT_EMAIL` | Optional: shows a "reportar" link on public pages |
 
-## Learn More
+## Admin scripts
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+node --env-file=.env.local scripts/seed.mjs sofiaferro        # seed a page, prints its edit link once
+node --env-file=.env.local scripts/seed.mjs sofiaferro --rotate  # overwrite and issue a new edit link
+node --env-file=.env.local scripts/takedown.mjs <handle>      # remove a page and purge its cache
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## License
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT
