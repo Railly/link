@@ -117,9 +117,14 @@ export default function LinkPage({ config, contained = false, footer = true, rep
         {footer ? (
           <div className="mt-auto pt-16 font-mono text-[10px] uppercase tracking-[0.2em]">
             <div className="lp-label flex gap-6">
-              <Link href="/editor" className="opacity-40 transition-opacity hover:opacity-100">
+              <a
+                href="https://github.com/sofiaferro/linkmi"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="opacity-40 transition-opacity hover:opacity-100"
+              >
                 linkmi · creá la tuya →
-              </Link>
+              </a>
               {reportEmail ? (
                 <a
                   href={`mailto:${reportEmail}?subject=${encodeURIComponent(`reporte: ${config.name}`)}`}
