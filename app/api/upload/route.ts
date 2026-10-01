@@ -1,5 +1,6 @@
 import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 import { NextResponse } from "next/server";
+import { allow } from "@/lib/ratelimit";
 
 /** Issues short-lived client-upload tokens for avatar images. */
 export async function POST(request: Request) {
@@ -13,6 +14,7 @@ export async function POST(request: Request) {
       request,
       onBeforeGenerateToken: async (pathname) => {
         if (!pathname.startsWith("avatars/")) throw new Error("ruta inválida");
+        if (!(await allow("upload", request.headers))) throw new Error("demasiadas fotos subidas, probá en un rato");
         return {
           allowedContentTypes: ["image/png", "image/jpeg", "image/webp", "image/gif", "image/avif"],
           maximumSizeInBytes: 2 * 1024 * 1024,

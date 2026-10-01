@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
+import { allow } from "@/lib/ratelimit";
 
 /** Import a public Linktree profile so people can migrate in one click. */
 export async function GET(req: Request) {
   const username = new URL(req.url).searchParams.get("u")?.trim().replace(/^@/, "") ?? "";
   if (!/^[A-Za-z0-9._-]{1,40}$/.test(username)) {
     return NextResponse.json({ error: "usuario inválido" }, { status: 400 });
+  }
+  if (!(await allow("import", req.headers))) {
+    return NextResponse.json({ error: "demasiadas importaciones, probá en un rato" }, { status: 429 });
   }
 
   const res = await fetch(`https://linktr.ee/${encodeURIComponent(username)}`, {
