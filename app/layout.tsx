@@ -14,8 +14,11 @@ const space = Space_Grotesk({ variable: "--font-space", subsets: ["latin"] });
 const syne = Syne({ variable: "--font-syne", subsets: ["latin"], weight: ["400", "700"] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.SITE_URL ?? "https://linkmi.ar"),
   title: "linkmi",
   description: "Tu página de links.",
+  openGraph: { siteName: "linkmi", locale: "es_AR", type: "website" },
+  twitter: { card: "summary_large_image" },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

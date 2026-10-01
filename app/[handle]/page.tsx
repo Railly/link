@@ -16,7 +16,16 @@ async function resolve(params: PageProps<"/[handle]">["params"]) {
 
 export async function generateMetadata({ params }: PageProps<"/[handle]">): Promise<Metadata> {
   const config = await resolve(params);
-  return config ? { title: config.name, description: config.bio } : {};
+  if (!config) return {};
+  const title = `${config.name} · linkmi`;
+  const description = config.bio || `Los links de ${config.name}.`;
+  // Nested metadata objects replace the layout's instead of merging, so repeat the shared fields.
+  return {
+    title,
+    description,
+    openGraph: { title, description, siteName: "linkmi", locale: "es_AR", type: "profile" },
+    twitter: { card: "summary_large_image", title, description },
+  };
 }
 
 async function HandlePage({ params }: Pick<PageProps<"/[handle]">, "params">) {
