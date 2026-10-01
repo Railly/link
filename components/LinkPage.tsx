@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import ShaderCanvas from "./ShaderCanvas";
 import { FONTS, sanitizeUrl, type PageConfig } from "@/lib/config";
 import { LinkIcon } from "@/lib/icons";
