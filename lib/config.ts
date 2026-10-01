@@ -70,6 +70,13 @@ export function sanitizeUrl(raw: string, schemes = SAFE_SCHEMES): string {
   }
 }
 
+/** Same-origin paths ("/me.png") stay relative; anything else must be an http(s) URL. */
+function sanitizeAvatar(raw: string): string {
+  const value = raw.trim();
+  if (/^\/(?!\/)/.test(value)) return value;
+  return sanitizeUrl(value, ["http:", "https:"]);
+}
+
 const isHex = (v: unknown): v is string => typeof v === "string" && /^#[0-9a-f]{6}$/i.test(v);
 const str = (v: unknown, max: number, fallback = "") =>
   typeof v === "string" ? v.slice(0, max) : fallback;
@@ -92,7 +99,7 @@ export function normalizeConfig(input: unknown): PageConfig {
   return {
     name: str(c.name, 80, d.name),
     bio: str(c.bio, 300, d.bio),
-    avatar: sanitizeUrl(str(c.avatar, 2000), ["http:", "https:"]) || (str(c.avatar, 200).startsWith("/") ? str(c.avatar, 200) : ""),
+    avatar: sanitizeAvatar(str(c.avatar, 2000)),
     links,
     shader: oneOf(c.shader, ["micelio", "aurora", "liquid", "mesh", "halftone"] as const, d.shader),
     colors,
