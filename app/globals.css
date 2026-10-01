@@ -172,3 +172,10 @@ li:first-child > .lp-line {
     transition: none;
   }
 }
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}

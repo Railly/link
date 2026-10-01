@@ -41,7 +41,7 @@ export default function LinkPage({ config, contained = false, footer = true, rep
         className="absolute inset-0 h-full w-full"
       />
 
-      <div className="absolute inset-0 overflow-y-auto">
+      <div className="no-scrollbar absolute inset-0 overflow-y-auto">
       <main className="relative mx-auto flex min-h-full w-full max-w-[34rem] flex-col items-center px-4 pb-10 pt-16 sm:pt-24">
         {config.avatar ? (
           // eslint-disable-next-line @next/next/no-img-element -- arbitrary user URLs
