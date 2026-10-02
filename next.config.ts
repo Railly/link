@@ -2,6 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
+  // The single-page share card reads brand fonts and the avatar from disk at request time.
+  outputFileTracingIncludes: { "/opengraph-image": ["./assets/og/**", "./public/*.jpg"] },
   async headers() {
     return [
       {
